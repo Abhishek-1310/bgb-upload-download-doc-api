@@ -1,56 +1,61 @@
-const AWS = require("aws-sdk");
-const s3 = new AWS.S3();
-const { v4: uuidv4 } = require("uuid");
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3'); // ✅ SDK v3
+const { v4: uuidv4 } = require('uuid'); // for unique file name
+
+const s3 = new S3Client();
 
 exports.handler = async (event) => {
-    const headers = {
+    const corsHeaders = {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Headers": "*",
-        "Access-Control-Allow-Methods": "POST,OPTIONS"
+        "Access-Control-Allow-Methods": "POST,OPTIONS",
     };
 
-    if (event.httpMethod === "OPTIONS") {
+    if (event.httpMethod === 'OPTIONS') {
         return {
             statusCode: 200,
-            headers,
-            body: JSON.stringify({ message: "CORS preflight handled" })
+            headers: corsHeaders,
+            body: JSON.stringify({ message: "CORS preflight handled" }),
         };
     }
 
     try {
-        const body = JSON.parse(event.body);
+        const body = JSON.parse(event.body || '{}');
         const { fileName, fileContent, contentType } = body;
 
         if (!fileName || !fileContent) {
             return {
                 statusCode: 400,
-                headers,
-                body: JSON.stringify({ error: "fileName and fileContent are required" })
+                headers: corsHeaders,
+                body: JSON.stringify({ error: "fileName and fileContent are required." }),
             };
         }
 
-        const buffer = Buffer.from(fileContent, "base64");
+        const buffer = Buffer.from(fileContent, 'base64');
+        const uniqueFileName = `${uuidv4()}-${fileName}`;
 
-        const uploadParams = {
+        const command = new PutObjectCommand({
             Bucket: process.env.BUCKET_NAME,
-            Key: `${uuidv4()}-${fileName}`,
+            Key: uniqueFileName,
             Body: buffer,
-            ContentType: contentType || "application/octet-stream"
-        };
+            ContentType: contentType || 'application/octet-stream',
+        });
 
-        await s3.putObject(uploadParams).promise();
+        await s3.send(command);
 
         return {
             statusCode: 200,
-            headers,
-            body: JSON.stringify({ message: "File uploaded successfully", fileKey: uploadParams.Key })
+            headers: corsHeaders,
+            body: JSON.stringify({
+                message: "File uploaded successfully",
+                fileKey: uniqueFileName,
+            }),
         };
     } catch (err) {
         console.error("Upload error:", err);
         return {
             statusCode: 500,
-            headers,
-            body: JSON.stringify({ error: "Failed to upload file", details: err.message })
+            headers: corsHeaders,
+            body: JSON.stringify({ error: err.message }),
         };
     }
 };
