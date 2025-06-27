@@ -1,5 +1,5 @@
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3'); // ✅ SDK v3
-const { v4: uuidv4 } = require('uuid'); // for unique file name
+const uuidv4 = () => Date.now().toString();
 
 const s3 = new S3Client();
 
