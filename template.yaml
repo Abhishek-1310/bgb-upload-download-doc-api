@@ -9,13 +9,11 @@ Globals:
 
 Resources:
 
-  # ✅ Create the S3 bucket
   FileStorageBucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: my-ceportal-doc-storage
 
-  # ✅ API Gateway for Upload and Download
   FileApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -26,7 +24,6 @@ Resources:
         AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
         AllowOrigin: "'*'"
 
-  # ✅ Upload Lambda
   UploadFileFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -47,7 +44,6 @@ Resources:
             Method: POST
             RestApiId: !Ref FileApi
 
-  # ✅ Download Lambda
   DownloadFileFunction:
     Type: AWS::Serverless::Function
     Properties:

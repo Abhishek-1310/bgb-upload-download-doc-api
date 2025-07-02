@@ -14,7 +14,7 @@ exports.handler = async (event) => {
         return {
             statusCode: 200,
             headers: corsHeaders,
-            body: JSON.stringify({ message: "CORS preflight handled done" }),
+            body: JSON.stringify({ message: "CORS preflight handled" }),
         };
     }
 
