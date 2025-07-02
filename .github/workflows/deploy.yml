@@ -29,7 +29,7 @@ jobs:
         aws cloudformation package \
           --template-file template.yaml \
           --s3-bucket bgb-ceportal-package-storage \
-          --s3-prefix user-action \
+          --s3-prefix uploadDownload \
           --region ap-south-1 \
           --output-template-file packaged.yaml
 
@@ -37,7 +37,7 @@ jobs:
       run: |
         aws cloudformation deploy \
           --template-file packaged.yaml \
-          --stack-name bgb-get-update-user-ceportal-stack \
+          --stack-name bgb-upload-download-ceportal-stack \
           --region ap-south-1 \
           --debug \
           --capabilities CAPABILITY_IAM
